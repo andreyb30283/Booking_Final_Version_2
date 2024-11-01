@@ -6,14 +6,14 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 
-from .serializers import *
+from listings_app.serializers import *
 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.models import User
-from .models.profiles import Profile
-from .serializers import UserSerializer
+from listings_app.models.profiles import Profile
+from listings_app.serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from datetime import datetime
@@ -28,46 +28,46 @@ from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-class LogoutView(APIView):
-    def post(self, request, *args, **kwargs):
-        response = Response(status=status.HTTP_204_NO_CONTENT)
-        response.delete_cookie('access_token')
-        response.delete_cookie('refresh_token')
-        return response
-
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user:
-            refresh = RefreshToken.for_user(user)
-            access_token = refresh.access_token
-            # Используем exp для установки времени истечения куки
-            access_expiry = datetime.utcfromtimestamp(access_token['exp'])
-            refresh_expiry = datetime.utcfromtimestamp(refresh['exp'])
-            response = Response(status=status.HTTP_200_OK)
-            response.set_cookie(
-                key='access_token',
-                value=str(access_token),
-                httponly=True,
-                secure=False,  # Используйте True для HTTPS
-                samesite='Lax',
-                expires=access_expiry)
-            response.set_cookie(
-                key='refresh_token',
-                value=str(refresh),
-                httponly=True,
-                secure=False,
-                samesite='Lax',
-                expires=refresh_expiry
-            )
-            return response
-        else:
-            return Response({"detail": "Invalid credentials"},
-                            status=status.HTTP_401_UNAUTHORIZED)
+# class LogoutView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         response = Response(status=status.HTTP_204_NO_CONTENT)
+#         response.delete_cookie('access_token')
+#         response.delete_cookie('refresh_token')
+#         return response
+#
+# class LoginView(APIView):
+#     permission_classes = [AllowAny]
+#
+#     def post(self, request, *args, **kwargs):
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#         user = authenticate(request, username=username, password=password)
+#         if user:
+#             refresh = RefreshToken.for_user(user)
+#             access_token = refresh.access_token
+#             # Используем exp для установки времени истечения куки
+#             access_expiry = datetime.utcfromtimestamp(access_token['exp'])
+#             refresh_expiry = datetime.utcfromtimestamp(refresh['exp'])
+#             response = Response(status=status.HTTP_200_OK)
+#             response.set_cookie(
+#                 key='access_token',
+#                 value=str(access_token),
+#                 httponly=True,
+#                 secure=False,  # Используйте True для HTTPS
+#                 samesite='Lax',
+#                 expires=access_expiry)
+#             response.set_cookie(
+#                 key='refresh_token',
+#                 value=str(refresh),
+#                 httponly=True,
+#                 secure=False,
+#                 samesite='Lax',
+#                 expires=refresh_expiry
+#             )
+#             return response
+#         else:
+#             return Response({"detail": "Invalid credentials"},
+#                             status=status.HTTP_401_UNAUTHORIZED)
 
 
 #
@@ -93,103 +93,18 @@ class LoginView(APIView):
 #             "access": str(refresh.access_token),
 #         }, status=status.HTTP_201_CREATED)
 
-class ListingListCreateView(generics.ListCreateAPIView):
-    queryset = Listing.objects.all()
-    serializer_class = ListingSerializer
-    permission_classes = [IsAuthenticated]
 
-    # renderer_classes = [JSONRenderer]
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)  # Устанавливаем владельца объявления как текущего пользователя
-
-
-class ListingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Listing.objects.all()
-    serializer_class = ListingSerializer
-    permission_classes = [IsAuthenticated]  # Доступ к редактированию и удалению только для авторизованных пользователей
-
-    # renderer_classes = [JSONRenderer]
-    def get_queryset(self):
-        """
-        Ограничим доступ к редактированию и удалению только для владельца объявления.
-        """
-        return Listing.objects.filter(owner=self.request.user)
 
 
 '''__________________________________________________________________________BOOKING______________________________________________'''
 
 
-class BookingListCreateView(generics.ListCreateAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
-    permissions_class = [IsAuthenticated]
-
-    # renderer_classes = [JSONRenderer]
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class BookingRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Booking.objects.all()
-    serializer_class = BookingSerializer
-    permissions_class = [IsAuthenticated]
-
-    # renderer_classes = [JSONRenderer]
-    def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user)
-
 
 '''___________________________________________________________________REVIEW_____________________________________________________________'''
 
 
-class ReviewListview(generics.ListAPIView):
-    serializer_class = ReviewSerializer
-
-    # renderer_classes = [JSONRenderer]
-    def get_queryset(self):
-        listings_id = self.kwargs.get('listing_id')
-        return Review.objects.filter(listings_id=listings_id)
-
-
-class ReviewListCreateView(generics.ListCreateAPIView):
-    queryset = Listing.objects.all()
-    serializer_class = ReviewSerializer
-    # renderer_classes = [JSONRenderer]
-
-
-class ReviewCreateView(generics.CreateAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]  # Только авторизованные пользователи
-
-    # renderer_classes = [JSONRenderer]
-    def perform_create(self, serializer):
-        booking_id = self.request.data.get('booking')  # Получаем бронирование из данных запроса
-        try:
-            booking = Booking.objects.get(id=booking_id, user=self.request.user)
-        except Booking.DoesNotExist:
-            raise PermissionDenied("You are not allowed to leave a review for this booking.")
-        if booking.end_date >= timezone.now().date():  # Проверяем, завершено ли бронирование
-            raise PermissionDenied("You cannot leave a review until the booking is completed.")
-        if Review.objects.filter(
-                booking=booking).exists():  # Проверяем, оставлял ли пользователь отзыв на это бронирование
-            raise PermissionDenied("You have already left a review for this booking.")
-        serializer.save(user=self.request.user, listing=booking.listing,
-                        booking=booking)  # Создаем отзыв, привязанный к бронированию
-
-
 '''________________________________________________________________________________________________________________________'''
 
-
-class ProfileRetrieveUpdateDestroyView(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    pagination_class = [IsAuthenticated]
-
-    # renderer_classes = [JSONRenderer]
-    def get_object(self):
-        obj = get_object_or_404(Profile, user=self.request.user)
-        return obj
 
 #
 #

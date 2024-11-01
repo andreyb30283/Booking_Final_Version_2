@@ -1,14 +1,15 @@
-# from django.contrib.auth.models import User
+
 from django.db import models
 from django.urls import reverse
-from django.conf import settings
+
 
 from .listings import Listing
+from .profiles import Profile
 
 
 class Booking(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
     is_confirmed = models.BooleanField(default=False)  # Подтверждено арендодателем

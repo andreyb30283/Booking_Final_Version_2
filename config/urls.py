@@ -34,7 +34,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('', LoginUser.as_view, )
     # path('captcha/', include('captcha.urls')),
-    path('', include('listings.urls')),
+    path('', include('listings_app.urls')),
     # path('accounts/', include('allauth.urls')),
 ]
 # # real_estate/urls.py

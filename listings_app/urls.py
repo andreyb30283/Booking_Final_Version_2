@@ -1,27 +1,41 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import (
-    ListingListCreateView, ListingRetrieveUpdateDestroyView,
-    BookingListCreateView, BookingRetrieveUpdateDestroyView,
-    ReviewListview, ReviewCreateView, ProfileRetrieveUpdateDestroyView
-)
+# from django.urls import path, include
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import path, reverse_lazy
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from .views.booking import BookingListCreateView, BookingRetrieveUpdateDestroyView
+from .views.listing import ListingListCreateView, ListingRetrieveUpdateDestroyView
+from .views.login_logout import LoginView, LogoutView
+from .views.review import ReviewListview, ReviewCreateView
+from .views.register import RegisterView
+
 #
 # router = DefaultRouter()
 # router.register(r'profiles', ProfileRetrieveUpdateDestroyView, basename='profile')
 
+
 urlpatterns = [
+    # path('api/register/', RegisterUserView.as_view(), name='register'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/login/', LoginView.as_view(), name='login'),
+
+
+    # path('api/register/', RegisterView.as_view(form_class=UserCreationForm
+    #                                            , success_url=reverse_lazy('login')), name='register'),
+
+    path('api/logout/', LogoutView.as_view(), name='logout'),
+
     # path('api/', include(router.urls)),  # Добавляем маршруты из роутера
-    path(r'api/listings/', ListingListCreateView.as_view(), name='listing-list-create'),
-    path(r'api/listings/<int:pk>/', ListingRetrieveUpdateDestroyView.as_view(), name='listing-detail'),
-    path(r'api/bookings/', BookingListCreateView.as_view(), name='booking-list-create'),
-    path(r'api/bookings/<int:pk>/', BookingRetrieveUpdateDestroyView.as_view(), name='booking-detail'),
-    path(r'api/reviews/', ReviewListview.as_view(), name='review-list'),
-    path(r'api/reviews/create/', ReviewCreateView.as_view(), name='review-create'),
+    path(r'listings/', ListingListCreateView.as_view(), name='listing-list-create'),
+    path(r'listings/<int:pk>/', ListingRetrieveUpdateDestroyView.as_view(), name='listing-detail'),
+    path(r'bookings/', BookingListCreateView.as_view(), name='booking-list-create'),
+    path(r'bookings/<int:pk>/', BookingRetrieveUpdateDestroyView.as_view(), name='booking-detail'),
+    path(r'reviews/', ReviewListview.as_view(), name='review-list'),
+    path(r'reviews/create/', ReviewCreateView.as_view(), name='review-create'),
 ]
-
-
-
-
 
 # from django.urls import path, include
 # from rest_framework import routers

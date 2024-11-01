@@ -1,37 +1,18 @@
 from rest_framework import serializers
-from .models import *
+from listings_app.models import *
 from django.contrib.auth.models import User
 
-from .models.bookings import Booking
-from .models.listings import Listing
-from .models.profiles import Profile
-from .models.reviews import Review
+from listings_app.models.bookings import Booking
+from listings_app.models.listings import Listing
+from listings_app.models.profiles import Profile
+from listings_app.models.reviews import Review
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+from django.contrib.auth.models import User
+from rest_framework import serializers
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
-    password2 = serializers.CharField(write_only=True, required=True)
-
-    class Meta:
-        model = User
-        fields = ('email', 'username', 'password', 'password2')
-
-    def validate(self, data):
-        if data['password'] != data['password2']:
-            raise serializers.ValidationError("Passwords must match.")
-        return data
-
-    def create(self, validated_data):
-        user = User(
-            email=validated_data['email'],
-            username=validated_data['username']
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
