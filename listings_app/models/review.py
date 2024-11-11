@@ -2,12 +2,13 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
-from .listings import Listing
+from .listing import Listing
 
 
 class Review(models.Model):
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, to_field='slug',
+                                on_delete=models.DO_NOTHING, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='reviews')
     rating = models.IntegerField(choices=[
         (1, '1 Star'),
         (2, '2 Stars'),
@@ -16,7 +17,6 @@ class Review(models.Model):
         (5, '5 Stars'),
     ])
     comment = models.TextField(blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

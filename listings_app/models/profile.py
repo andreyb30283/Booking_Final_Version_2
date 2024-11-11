@@ -5,10 +5,8 @@ from django.conf import settings
 
 
 class Profile(models.Model):
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='profile')
+    phone_number = models.CharField(max_length=150, blank=True)
     is_landlord = models.BooleanField(default=False)
 
     def __str__(self):

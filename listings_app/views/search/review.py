@@ -1,0 +1,32 @@
+
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from listings_app.models import Listing, Review, Booking
+from listings_app.serializers.review import ReviewSerializer
+
+
+class ListingReviewView(ListCreateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+    def get_queryset(self):
+        listing_slug = self.kwargs['listing_slug']
+        listing = get_object_or_404(Listing, slug=listing_slug)
+        return Review.objects.filter(listing=listing)
+
+    def perform_create(self, serializer):
+        listing = get_object_or_404(Listing, slug=self.kwargs['listing_slug'])
+        booking_exists = Booking.objects.filter(
+            listing=listing,
+            user=self.request.user,
+            is_confirmed=True,
+            end_date__lt=timezone.now().date()
+        ).exists()
+        if booking_exists:
+            serializer.save(listing=listing, user=self.request.user)
+        else:
+            raise ValidationError("You have not permissions")

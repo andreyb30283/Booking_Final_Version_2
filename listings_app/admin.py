@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models.profiles import Profile
+from .models.profile import Profile
 from django.contrib import admin
 
 #
@@ -9,10 +9,10 @@ from django.contrib import admin
 # class UserProfileAdmin(admin.ModelAdmin):
 #     list_display = ('user', 'is_site_user', 'phone_number')
 
-from .models.bookings import Booking
-from .models.listings import Listing
-from .models.profiles import Profile
-from .models.reviews import Review
+from .models.booking import Booking
+from .models.listing import Listing
+from .models.profile import Profile
+from .models.review import Review
 
 admin.site.register(Listing)
 admin.site.register(Booking)

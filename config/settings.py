@@ -12,9 +12,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+import pymysql
+pymysql.install_as_MySQLdb()
+import os
+# from dotenv import load_dotenv
+from pathlib import Path
+import pymysql
+# load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,7 +34,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,7 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_filters',
+
+    'rest_framework.authtoken',
+
+    'rest_framework_simplejwt',
     'rest_framework',
+    'drf_yasg',
 
     'listings_app.apps.ListingsAppConfig'
 ]
@@ -52,8 +64,23 @@ REST_FRAMEWORK = {
     ],
 }
 
-
 from datetime import timedelta
+
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # другие промежуточные ПО
+    'listings_app.middleware.JWTAuthenticationMiddleware',
+
+
+]
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
@@ -62,20 +89,6 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # другие промежуточные ПО
-    'listings_app.middleware.JWTAuthenticationMiddleware',
-    ]
-
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -96,7 +109,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -107,6 +119,23 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#         'HOST': os.getenv('DB_HOST'),
+#         'PORT': os.getenv('DB_PORT'),
+#         'OPTIONS': {
+#             'ssl': {
+#                 'check_hostname': False,  # Отключение проверки имени хоста
+#             },
+#         },
+#     }
+# }
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -114,7 +143,6 @@ DATABASES = {
 AUTHENTICATION_LOCKOUT_THRESHOLD = 5
 AUTHENTICATION_LOCKOUT_DURATION = 300
 AUTH_PASSWORD_MIN_LENGTH = 8
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -131,7 +159,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -143,7 +170,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -153,3 +179,57 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import os
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'db.log'),  # Путь к файлу логов
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
+'''handlers: Определяют, куда будут записываться логи. В данном случае
+используются два обработчика: console для вывода в консоль и file для записи
+в файл.
+○ console: Использует класс logging.StreamHandler для вывода логов в
+консоль.
+○ file: Использует класс logging.FileHandler для записи логов в файл
+db.log.
+● loggers: Определяют, какие логи будут обрабатываться. Логгер
+django.db.backends используется для логирования SQLзапросов.
+○ level: Уровень логирования DEBUG, который регистрирует все
+SQL запросы.'''
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PAGINATION_CLASS':
+#         'rest_framework.pagination.PageNumberPagination',
+#     'PAGE_SIZE': 5,  # Размер страницы по умолчанию
+# }
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PAGINATION_CLASS':
+#         'rest_framework.pagination.LimitOffsetPagination',
+#     'PAGE_SIZE': 5,  # Лимит по умолчанию, используемый как размер страницы
+# }
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PAGINATION_CLASS':
+#         'rest_framework.pagination.CursorPagination',
+#     'PAGE_SIZE': 5,  # Размер страницы по умолчанию
+# }
