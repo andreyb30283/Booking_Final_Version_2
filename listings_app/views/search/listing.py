@@ -1,18 +1,19 @@
+from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import ListAPIView
 from listings_app.models.listing import Listing
 from listings_app.serializers.serializers import ListingSerializer, SearchQuerySerializer
-from rest_framework import generics
 
 
-class SearchListingListView(generics.ListAPIView):
+class SearchListingListView(ListAPIView):
     permission_classes = []
     serializer_class = ListingSerializer
     queryset = Listing.objects.filter(is_active=True)
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['price', 'location', 'rooms', 'property_type']
     search_fields = ['title', 'description']
-    ordering_fields = ['price', 'created_at']
+    ordering_fields = ['-price', 'created_at', '-avg_rating']
 
     def get_queryset(self):
        #/?min_price=100&max_price=1500&city=Ber&rooms_min=2&rooms_max=4&property_type=apartment
@@ -48,7 +49,7 @@ class SearchListingListView(generics.ListAPIView):
 
         if any([title, description, location, city, rooms_min, rooms_max, property_type, price_min, price_max]):
             search_query_data = {
-                'user': self.request.user.username if self.request.user.is_authenticated else 'Anonymous',
+                'owner': self.request.user if self.request.user.is_authenticated else 'Anonymous',
                 'title': title,
                 'description': description,
                 'location': location,
@@ -69,4 +70,4 @@ class SearchListingListView(generics.ListAPIView):
             else:
                 print(search_query_serializer.errors)
 
-        return queryset
+        return queryset.annotate(avg_rating=Avg('reviews__rating'))

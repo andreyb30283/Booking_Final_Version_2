@@ -31,3 +31,11 @@ class IsOwner(permissions.BasePermission):
 class IsNotOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return obj.owner != request.user
+
+
+class IsNotLandlordForCreate(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return not getattr(request.user, 'is_landlord', False)
+        return True

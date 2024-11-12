@@ -44,14 +44,14 @@ class ProfileSerializer(serializers.ModelSerializer):
 class NotLandlordBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['id', 'listing', 'user', 'start_date', 'end_date', 'is_confirmed', 'is_canceled', 'cancel_deadline']
-        read_only_fields = ['listing', 'user', 'is_confirmed', 'cancel_deadline']
+        fields = ['id', 'listing', 'owner', 'start_date', 'end_date', 'is_confirmed', 'is_canceled', 'cancel_deadline']
+        read_only_fields = ['listing', 'owner', 'is_confirmed', 'cancel_deadline']
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
         user = request.user if request else None
 
-        if instance.user != user:
+        if instance.owner != user:
             raise serializers.ValidationError("You do not have permission to cancel this booking.")
 
         # Only allow cancellation if the deadline has not passed
@@ -72,7 +72,7 @@ class LandlordBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = '__all__'
-        read_only_fields = ['id', 'listing', 'user', 'start_date', 'end_date', 'is_canceled']
+        read_only_fields = ['id', 'listing', 'owner', 'start_date', 'end_date', 'is_canceled']
 
 
 class LandlordListingSerializer(serializers.ModelSerializer):
@@ -117,7 +117,8 @@ class ReviewWriteSerializer(serializers.ModelSerializer):
 
 
 class SearchQuerySerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = SearchQuery
         fields = '__all__'
-        # read_only_fields = ['user', 'created_at']
+        read_only_fields = ['owner', 'created_at']

@@ -1,10 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
-
-from listings_app.models.profile import Profile
 
 
 class Listing(models.Model):
@@ -28,6 +25,14 @@ class Listing(models.Model):
     slug = models.SlugField(unique=True, blank=True, primary_key=True)
 
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['title']),
+            models.Index(fields=['created_at', 'owner'])
+        ]
+
     def save(self, *args, **kwargs):
         if not self.slug:
             created_at_value = self.created_at or timezone.now()
@@ -41,15 +46,6 @@ class Listing(models.Model):
 
         super().save(*args, **kwargs)
 
-    # prepopulated_fields = {"slug" : ("name",)}
-
     def __str__(self):
         return self.title
 
-    #
-    def get_absolute_url(self):
-        return reverse('post', kwargs={'post_id': self.pk})
-
-    # def delete(self, *args, **kwargs):
-    #     self.is_deleted = True
-    #     self.save()

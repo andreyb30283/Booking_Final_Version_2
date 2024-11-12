@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate
 from listings_app.models.profile import Profile
 
 
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
@@ -42,10 +44,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         profile_data = validated_data.pop('profile', {})
         password = validated_data.pop('password')
         user = User.objects.create(**validated_data)
-        # Извлекаем данные профиля
-        # phone_number = validated_data.pop('phone_number', '')
-        # is_landlord = validated_data.pop('is_landlord', False)
-
         user.set_password(password)
         user.save()
         Profile.objects.create(user=user, phone_number=profile_data.get('phone_number', ''),

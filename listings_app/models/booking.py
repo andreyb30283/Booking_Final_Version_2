@@ -3,7 +3,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
-
 from .listing import Listing
 
 
@@ -23,7 +22,4 @@ class Booking(models.Model):
             raise ValidationError('Start date can not be in the past.')
 
     def __str__(self):
-        return f"{self.listing.title} - {self.user.username}"
-
-    def get_absolute_url(self):
-        return reverse('post', kwargs={'post_id': self.pk})
+        return f"{self.listing.title} - {self.owner.username}"
