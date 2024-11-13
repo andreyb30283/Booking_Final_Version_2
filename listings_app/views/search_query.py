@@ -10,4 +10,4 @@ class SearchQueryListView(ListAPIView):
     permissions = [IsAuthenticated]
 
     def get_queryset(self):
-        return SearchQuery.objects.filter(owner=self.request.user.id)
+        return SearchQuery.objects.filter(owner=self.request.user)
