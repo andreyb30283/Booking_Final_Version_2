@@ -25,3 +25,4 @@ class LoginView(APIView):
             return response
         else:
             return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+

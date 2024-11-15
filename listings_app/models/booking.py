@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from rest_framework.exceptions import ValidationError
 from .listing import Listing
@@ -8,7 +7,7 @@ from .listing import Listing
 
 class Booking(models.Model):
     listing = models.ForeignKey(Listing, to_field='slug', on_delete=models.DO_NOTHING)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     start_date = models.DateField()
     end_date = models.DateField()
     is_confirmed = models.BooleanField(default=False)  # Confirmed by landlord

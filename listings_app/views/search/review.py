@@ -29,4 +29,4 @@ class ListingReviewView(ListCreateAPIView):
         if booking_exists:
             serializer.save(listing=listing, user=self.request.user)
         else:
-            raise ValidationError("You have not permissions")
+            raise ValidationError("You have not permissions to add review now")

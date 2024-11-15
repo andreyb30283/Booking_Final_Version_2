@@ -12,26 +12,7 @@ from listings_app.views.search.booking import SearchBookingViewSet
 from listings_app.views.search.listing import SearchListingListView
 from listings_app.views.search.review import ListingReviewView
 from listings_app.views.search_query import SearchQueryListView
-from django.urls import path, re_path
-
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-# Swagger UI: http://127.0.0.1:8000/api/schema/swagger-ui/
-# Redoc UI: http://127.0.0.1:8000/api/schema/redoc/
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Your API Title",
-        default_version='v1',
-        description="API documentation",
-        terms_of_service="https://www.example.com/terms/",
-        contact=openapi.Contact(email="contact@example.com"),
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=(AllowAny,),
-)
-
+from django.urls import path
 
 router = DefaultRouter()
 router.register('profiles', ProfileRetrieveUpdateDestroyView, basename='profile')
@@ -63,37 +44,4 @@ urlpatterns = [
          LandlordBookingViewSet.as_view({'get': 'retrieve', 'patch': 'partial_update'}),
          name='landlord-booking-detail'),
     path('search-queries/', SearchQueryListView.as_view(), name='search-query-list'),
-    # re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    # path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    # path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
-]
-
-from django.urls import path
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from django.views.generic import TemplateView
-
-
-#
-# urlpatterns += [
-#     # ...
-#     # Route TemplateView to serve the ReDoc template.
-#     #   * Provide `extra_context` with view name of `SchemaView`.
-#     path(
-#         "redoc/",
-#         TemplateView.as_view(
-#             template_name="redoc.html", extra_context={"schema_url": "openapi-schema"}
-#         ),
-#         name="redoc",
-#     ),
-# ]
-
-
-urlpatterns += [
-    # OpenAPI schema endpoint
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
-    # Swagger UI
-    path('schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # Redoc UI
-    path('schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

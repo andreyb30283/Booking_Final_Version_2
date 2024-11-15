@@ -13,7 +13,7 @@ class SearchListingListView(ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['price', 'location', 'rooms', 'property_type']
     search_fields = ['title', 'description']
-    ordering_fields = ['-price', 'created_at', '-avg_rating']
+    ordering_fields = ['-price', '-created_at', '-avg_rating']
 
     def get_queryset(self):
        #/?min_price=100&max_price=1500&city=Ber&rooms_min=2&rooms_max=4&property_type=apartment
@@ -49,7 +49,7 @@ class SearchListingListView(ListAPIView):
 
         if any([title, description, location, city, rooms_min, rooms_max, property_type, price_min, price_max]):
             search_query_data = {
-                'owner': self.request.user if self.request.user.is_authenticated else 'Anonymous',
+                'owner': self.request.user if self.request.user.is_authenticated else None,
                 'title': title,
                 'description': description,
                 'location': location,
@@ -64,10 +64,19 @@ class SearchListingListView(ListAPIView):
             # for k in search_query_data:
             #     print(f'{k}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             # Сохраняем данные запроса
-            search_query_serializer = SearchQuerySerializer(data=search_query_data)
+            search_query_serializer = SearchQuerySerializer(data=search_query_data, context={'request':self.request})
+
             if search_query_serializer.is_valid():
                 search_query_serializer.save()
             else:
                 print(search_query_serializer.errors)
 
         return queryset.annotate(avg_rating=Avg('reviews__rating'))
+
+    # def get_serializer_context(self):
+    #     # Получаем стандартный контекст
+    #     context = super().get_serializer_context()
+    #     print(context)
+    #     # Добавляем дополнительные данные в контекст
+    #     # context['request'] = self.request
+    #     return context

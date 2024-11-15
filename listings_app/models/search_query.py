@@ -28,6 +28,7 @@ class SearchQuery(models.Model):
                            'price_max')
 
     def save(self, *args, **kwargs):
+
         query = SearchQuery.objects.filter(
             owner=self.owner,
             title=self.title,

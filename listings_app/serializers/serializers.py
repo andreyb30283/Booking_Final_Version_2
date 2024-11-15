@@ -118,7 +118,18 @@ class ReviewWriteSerializer(serializers.ModelSerializer):
 
 class SearchQuerySerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    # print(hasattr(serializers,'source'))
     class Meta:
         model = SearchQuery
         fields = '__all__'
         read_only_fields = ['owner', 'created_at']
+
+    def create(self, validate_data):
+        # print('!!!!!', self.context)
+        request = self.context.get('request',None)
+        if request and hasattr(request,'user'):
+            validate_data['owner'] = request.user
+        else:
+            validate_data['owner'] = None
+
+        return super().create(validate_data)
